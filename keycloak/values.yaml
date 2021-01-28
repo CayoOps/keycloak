@@ -341,11 +341,11 @@ lifecycleHooks: {}
 
 ## Extra volumes to add to the deployment
 ##
-extraVolumes: [/home/cayofelipesdj/kcvolume]
+extraVolumes: ["/home/cayofelipesdj/kcvolume"]
 
 ## Extra volume mounts to add to the container
 ##
-extraVolumeMounts: [/home/cayofelipesdj/kcvolume]
+extraVolumeMounts: ["/home/cayofelipesdj/kcvolume"]
 
 ## Add init containers to the Keycloak pods.
 ## Example:
