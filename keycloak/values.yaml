@@ -341,11 +341,17 @@ lifecycleHooks: {}
 
 ## Extra volumes to add to the deployment
 ##
-extraVolumes: []
+extraVolumes: |
+  - name: keycloak-logs
+    emptyDir: {}
+
 
 ## Extra volume mounts to add to the container
 ##
-extraVolumeMounts: []
+extraVolumeMounts: |
+  - name: keycloak-logs
+    mountPath: /opt/jboss/keycloak/standalone/log
+
 
 ## Add init containers to the Keycloak pods.
 ## Example:
@@ -361,14 +367,11 @@ initContainers: {}
 
 ## Add sidecars to the Keycloak pods.
 ## Example:
-## sidecars:
-##   - name: your-image-name
-##     image: your-image
-##     imagePullPolicy: Always
-##     ports:
-##       - name: portname
-##         containerPort: 1234
-##
+ sidecars:
+   - name: fluentd
+     image: fluent/fluentd
+     imagePullPolicy: Always
+
 sidecars: {}
 
 ## Service configuration
