@@ -1,0 +1,220 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  creationTimestamp: "2019-05-09T05:39:24Z"
+  generation: 11
+  labels:
+    app: rabbitmq-ha
+    chart: rabbitmq-ha-1.46.5
+    heritage: Tiller
+    release: rabbitmq
+  name: rabbitmq
+  namespace: mktp
+  resourceVersion: "185007591"
+  selfLink: /apis/apps/v1/namespaces/mktp/statefulsets/rabbitmq
+  uid: cd9624a8-721c-11e9-917e-4e7c6532cc65
+spec:
+  podManagementPolicy: Parallel
+  replicas: 0
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: rabbitmq-ha
+      release: rabbitmq
+  serviceName: rabbitmq-discovery
+  template:
+    metadata:
+      annotations:
+        checksum/config: ef18414946ece302f4abf1013951b47d5debc10142d57f74ea63f985389df0d1
+        checksum/secret: 7380e28b3a611294fb134da9d05b10c037e8c08d340ace7d67cf96505e886985
+        prometheus.io/path: /metrics
+        prometheus.io/port: "15692"
+        prometheus.io/scrape: "true"
+      creationTimestamp: null
+      labels:
+        app: rabbitmq-ha
+        release: rabbitmq
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: rabbitmq-ha
+                  release: rabbitmq
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - command:
+        - cat
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: RABBITMQ_USE_LONGNAME
+          value: "true"
+        - name: RABBITMQ_NODENAME
+          value: rabbit@$(MY_POD_NAME).rabbitmq-discovery.mktp.svc.cluster.local
+        - name: K8S_HOSTNAME_SUFFIX
+          value: .rabbitmq-discovery.mktp.svc.cluster.local
+        - name: K8S_SERVICE_NAME
+          value: rabbitmq-discovery
+        - name: RABBITMQ_ERLANG_COOKIE
+          valueFrom:
+            secretKeyRef:
+              key: rabbitmq-erlang-cookie
+              name: rabbitmq
+        - name: RABBIT_MANAGEMENT_USER
+          valueFrom:
+            secretKeyRef:
+              key: rabbitmq-management-username
+              name: rabbitmq
+        - name: RABBIT_MANAGEMENT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: rabbitmq-management-password
+              name: rabbitmq
+        image: rabbitmq:3.8.0-alpine
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - 'timeout 5 wget -O - -q --header "Authorization: Basic `echo -n \"$RABBIT_MANAGEMENT_USER:$RABBIT_MANAGEMENT_PASSWORD\"
+              | base64`" http://127.0.0.1:15672/api/healthchecks/node | grep -qF "{\"status\":\"ok\"}"'
+          failureThreshold: 6
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: rabbitmq-ha
+        ports:
+        - containerPort: 4369
+          name: epmd
+          protocol: TCP
+        - containerPort: 5672
+          name: amqp
+          protocol: TCP
+        - containerPort: 15672
+          name: http
+          protocol: TCP
+        - containerPort: 15692
+          name: metrics
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - 'timeout 3 wget -O - -q --header "Authorization: Basic `echo -n \"$RABBIT_MANAGEMENT_USER:$RABBIT_MANAGEMENT_PASSWORD\"
+              | base64`" http://127.0.0.1:15672/api/healthchecks/node | grep -qF "{\"status\":\"ok\"}"'
+          failureThreshold: 6
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 3
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+        volumeMounts:
+        - mountPath: /var/lib/rabbitmq
+          name: rabbitmq-data
+        - mountPath: /etc/rabbitmq
+          name: config
+        - mountPath: /etc/definitions
+          name: definitions
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      initContainers:
+      - args:
+        - -c
+        - |
+          set -ex
+          cp /configmap/* /etc/rabbitmq
+          echo "${RABBITMQ_ERLANG_COOKIE}" > /var/lib/rabbitmq/.erlang.cookie
+          chown -R 100:101 /var/lib/rabbitmq/
+          chown -R 100:101 /etc/rabbitmq
+        command:
+        - sh
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: RABBITMQ_MNESIA_DIR
+          value: /var/lib/rabbitmq/mnesia/rabbit@$(POD_NAME).rabbitmq-discovery.mktp.svc.cluster.local
+        - name: RABBITMQ_ERLANG_COOKIE
+          valueFrom:
+            secretKeyRef:
+              key: rabbitmq-erlang-cookie
+              name: rabbitmq
+        image: busybox:1.30.1
+        imagePullPolicy: IfNotPresent
+        name: bootstrap
+        resources: {}
+        securityContext:
+          runAsGroup: 0
+          runAsNonRoot: false
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /configmap
+          name: configmap
+        - mountPath: /etc/rabbitmq
+          name: config
+        - mountPath: /var/lib/rabbitmq
+          name: rabbitmq-data
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 101
+        runAsNonRoot: true
+        runAsUser: 100
+      serviceAccount: rabbitmq
+      serviceAccountName: rabbitmq
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - emptyDir: {}
+        name: config
+      - configMap:
+          defaultMode: 420
+          name: rabbitmq
+        name: configmap
+      - name: definitions
+        secret:
+          defaultMode: 420
+          items:
+          - key: definitions.json
+            path: definitions.json
+          secretName: rabbitmq
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: rabbitmq-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Gi
+      storageClassName: ibmc-block-retain-bronze
+      volumeMode: Filesystem
+    status:
+      phase: Pending
+status:
+  collisionCount: 0
+  currentRevision: rabbitmq-779b8b66fc
+  observedGeneration: 11
+  replicas: 0
+  updateRevision: rabbitmq-779b8b66fc
