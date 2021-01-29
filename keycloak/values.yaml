@@ -350,7 +350,7 @@ extraVolumes: |
 ##
 extraVolumeMounts: |
   - name: keycloak-logs
-        mountPath: /opt/jboss/keycloak/standalone/log
+    mountPath: /opt/jboss/keycloak/standalone/log
 
 
 ## Add init containers to the Keycloak pods.
@@ -375,13 +375,13 @@ initContainers: {}
 ##       - name: portname
 ##         containerPort: 1234
 ##
-##sidecars:
-##  - name: fluentd
-##    image: fluent/fluentd
-##    imagePullPolicy: Always
-##    command:
-##    - cat 
-##    tty: true
+sidecars:
+  - name: fluentd
+    image: fluent/fluentd
+    imagePullPolicy: Always
+    command:
+    - cat 
+    tty: true
 
 ##sidecars: {}
 
