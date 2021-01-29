@@ -375,13 +375,13 @@ initContainers: {}
 ##       - name: portname
 ##         containerPort: 1234
 ##
-sidecars:
-  - name: fluentd
-    image: fluent/fluentd
-    imagePullPolicy: Always
-    command:
-    - cat 
-    tty: true
+##sidecars:
+##  - name: fluentd
+##    image: fluent/fluentd
+##    imagePullPolicy: Always
+##    command:
+##    - cat 
+##    tty: true
 
 ##sidecars: {}
 
