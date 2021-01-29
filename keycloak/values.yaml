@@ -383,9 +383,10 @@ sidecars:
     - cat 
     tty: true
 
+##sidecars: {}
 
 ## Service configuration
-##
+#
 service:
   ## Service type.
   ##
