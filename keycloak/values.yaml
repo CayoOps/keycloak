@@ -341,16 +341,12 @@ lifecycleHooks: {}
 
 ## Extra volumes to add to the deployment
 ##
-extraVolumes: |
-  - name: keycloak-logs
-    emptyDir: {}
+extraVolumes:
 
 
 ## Extra volume mounts to add to the container
 ##
-extraVolumeMounts: |
-  - name: keycloak-logs
-    mountPath: /opt/jboss/keycloak/standalone/log
+extraVolumeMounts:
 
 
 ## Add init containers to the Keycloak pods.
