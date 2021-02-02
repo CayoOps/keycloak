@@ -342,6 +342,11 @@ lifecycleHooks: {}
 ## Extra volumes to add to the deployment
 ##
 extraVolumes:
+  - name: config-volume
+    configMap:
+      # Provide the name of the ConfigMap containing the files you want
+      # to add to the container
+      name: fluentconfigmap
 
 
 ## Extra volume mounts to add to the container
@@ -375,6 +380,9 @@ sidecars:
   - name: fluentd
     image: fluent/fluentd
     imagePullPolicy: Always
+    volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
     command:
     - cat 
     tty: true
