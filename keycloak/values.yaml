@@ -384,7 +384,7 @@ initContainers: {}
 ##
 sidecars:
   - name: fluentd
-    image: fluent/fluentd
+    image: fluent/fluentd-hec
     imagePullPolicy: Always
     volumeMounts:
       - name: config-volume
