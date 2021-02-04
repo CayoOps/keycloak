@@ -342,13 +342,14 @@ lifecycleHooks: {}
 ## Extra volumes to add to the deployment
 ##
 extraVolumes:
+  - name: pathlog
+    emptyDir: {} 
   - name: config-volume
     configMap:
       # Provide the name of the ConfigMap containing the files you want
       # to add to the container
       name: fluentconfigmap
-  - name: pathlog
-    emptyDir: {} 
+
 
 
 ## Extra volume mounts to add to the container
