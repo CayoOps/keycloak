@@ -355,8 +355,8 @@ extraVolumes:
 ## Extra volume mounts to add to the container
 ##
 extraVolumeMounts:
-  - name: pathlog
-    mountPath: /opt/bitnami/keycloak/standalone/log
+##  - name: pathlog
+##    mountPath: /opt/bitnami/keycloak/standalone/log
 
 
 
