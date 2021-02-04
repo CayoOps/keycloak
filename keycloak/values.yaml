@@ -347,11 +347,16 @@ extraVolumes:
       # Provide the name of the ConfigMap containing the files you want
       # to add to the container
       name: fluentconfigmap
+  - name: pathlog
+    emptyDir: {} 
 
 
 ## Extra volume mounts to add to the container
 ##
 extraVolumeMounts:
+  - name: pathlog
+    mounthPath: /opt/bitnami/keycloak/standalone/log
+
 
 
 ## Add init containers to the Keycloak pods.
@@ -383,8 +388,10 @@ sidecars:
     volumeMounts:
       - name: config-volume
         mountPath: /etc/config
+      - name: pathlog
+        mounthPath: /opt/bitnami/keycloak/standalone/log
     command:
-    - cat 
+    - -c  
     tty: true
 
 ##sidecars: {}
