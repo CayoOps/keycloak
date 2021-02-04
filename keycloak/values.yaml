@@ -355,7 +355,7 @@ extraVolumes:
 ##
 extraVolumeMounts:
   - name: pathlog
-    mounthPath: /opt/bitnami/keycloak/standalone/log
+    mountPath: /opt/bitnami/keycloak/standalone/log
 
 
 
@@ -389,7 +389,7 @@ sidecars:
       - name: config-volume
         mountPath: /etc/config
       - name: pathlog
-        mounthPath: /opt/bitnami/keycloak/standalone/log
+        mountPath: /opt/bitnami/keycloak/standalone/log
     command:
     - -c  
     tty: true
